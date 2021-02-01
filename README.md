@@ -16,3 +16,7 @@ https://nodejs.org/en/download/
 
 # Run Script
 * After all changes are made, run "npm run start" in root directory to start running the script.
+
+# Notes
+* You should have a best buy account with payment info, shipping address, etc all filled before running script
+* Once script is running, browser window should be left visible on computer. You can have other programs running next to it but it must be visible or best buy blocks it
