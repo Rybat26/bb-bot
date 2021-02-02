@@ -132,7 +132,7 @@ const scraperObject = {
       console.log("Item purchased.");
     } else {
       console.log("Attempt number: ", this.attempts++);
-      await sleep(process.env.TIMEOUT + getRndInteger(1000, 30000));
+      await sleep(parseInt(process.env.TIMEOUT) + getRndInteger(1000, 10000));
       page.close();
       this.scraper(browser);
     }
