@@ -41,10 +41,10 @@ const scraperObject = {
         (node) => node.innerHTML
       );
       addToCartExists = true;
-      console.log("Add to cart button does exist.");
+      console.log("Item is in stock. Attempting to purchase.");
     } catch (err) {
       addToCartExists = false;
-      console.log("Add to cart button does NOT exist.");
+      console.log("Item was out of stock.");
     }
     if (addToCartExists) {
       const addToCart = async () => {
@@ -131,10 +131,16 @@ const scraperObject = {
       closeBrowser = true;
       console.log("Item purchased.");
     } else {
-      console.log("Attempt number: ", this.attempts++);
-      await sleep(parseInt(process.env.TIMEOUT) + getRndInteger(1000, 10000));
-      page.close();
-      this.scraper(browser);
+      const randomDelay =
+        parseInt(process.env.TIMEOUT) + getRndInteger(1000, 10000);
+      console.log(
+        `This was attempt number ${this.attempts++}. Checking stock again in ${
+          randomDelay / 1000
+        } seconds.`
+      );
+      await sleep(randomDelay);
+      await page.close();
+      await this.scraper(browser);
     }
     return closeBrowser;
   },
