@@ -5,9 +5,10 @@ const scraperObject = {
     "https://www.bestbuy.com/site/sandisk-cruzer-16gb-usb-2-0-flash-drive-black/9226875.p?skuId=9226875",
   attempts: 1,
   async scraper(browser) {
+    const currentURL = this.url;
     let page = await browser.newPage();
-    console.log(`Navigating to ${this.url}...`);
-    await page.goto(this.url);
+    console.log(`Navigating to ${currentURL}...`);
+    await page.goto(currentURL);
 
     const session = await page.target().createCDPSession();
     await session.send("Page.enable");
@@ -41,46 +42,62 @@ const scraperObject = {
         (node) => node.innerHTML
       );
       addToCartExists = true;
-      console.log("Item is in stock. Attempting to purchase.");
+      console.log("Item is in stock. Attempting purchase.");
     } catch (err) {
       addToCartExists = false;
       console.log("Item was out of stock.");
     }
     if (addToCartExists) {
       const addToCart = async () => {
-        await page.click("main");
-        await page.click(".add-to-cart-button");
-        await sleep(getRndInteger(1200, 2000));
-        await Promise.all([
-          page.waitForNavigation(),
-          page.click(".btn.btn-secondary.btn-sm.btn-block"),
-        ]);
+        try {
+          console.log("Adding item to cart.");
+          await page.click("main");
+          await page.click("main");
+          await page.click(".add-to-cart-button");
+          await sleep(getRndInteger(2000, 3500));
+          await Promise.all([
+            page.waitForNavigation(),
+            page.click(".btn.btn-secondary.btn-sm.btn-block"),
+          ]);
+        } catch (err) {
+          console.log("Failed to add item to cart. ", err);
+        }
       };
 
       const checkout = async () => {
-        await sleep(getRndInteger(1200, 3000));
-        await Promise.all([
-          page.waitForNavigation(),
-          page.click(".btn.btn-lg.btn-block.btn-primary"),
-        ]);
+        try {
+          console.log("Going to checkout page.");
+          await sleep(getRndInteger(2000, 3500));
+          await Promise.all([
+            page.waitForNavigation(),
+            page.click(".btn.btn-lg.btn-block.btn-primary"),
+          ]);
+        } catch (err) {
+          console.log("Failed to go to checkout page. ", err);
+        }
       };
 
       const login = async () => {
-        await page.type("#fld-e", process.env.USER_EMAIL, {
-          delay: getRndInteger(30, 70),
-        });
-        await page.type("#fld-p1", process.env.USER_PASSWORD, {
-          delay: getRndInteger(20, 80),
-        });
-        await Promise.all([
-          page.waitForNavigation(),
-          page.waitForSelector(
-            ".btn.btn-secondary.btn-lg.btn-block.btn-leading-ficon.c-button-icon.c-button-icon-leading.cia-form__controls__submit"
-          ),
-          page.click(
-            ".btn.btn-secondary.btn-lg.btn-block.btn-leading-ficon.c-button-icon.c-button-icon-leading.cia-form__controls__submit"
-          ),
-        ]);
+        try {
+          console.log("Logging in.");
+          await page.type("#fld-e", process.env.USER_EMAIL, {
+            delay: getRndInteger(50, 90),
+          });
+          await page.type("#fld-p1", process.env.USER_PASSWORD, {
+            delay: getRndInteger(40, 100),
+          });
+          await Promise.all([
+            page.waitForNavigation(),
+            page.waitForSelector(
+              ".btn.btn-secondary.btn-lg.btn-block.btn-leading-ficon.c-button-icon.c-button-icon-leading.cia-form__controls__submit"
+            ),
+            page.click(
+              ".btn.btn-secondary.btn-lg.btn-block.btn-leading-ficon.c-button-icon.c-button-icon-leading.cia-form__controls__submit"
+            ),
+          ]);
+        } catch (err) {
+          console.log("Failed to login. ", err);
+        }
       };
 
       const fillAddress = async () => {
@@ -107,9 +124,14 @@ const scraperObject = {
       };
 
       const fillCCV = async () => {
-        await page.type(`#credit-card-cvv`, process.env.USER_CCV, {
-          delay: getRndInteger(10, 30),
-        });
+        try {
+          console.log("Filling out CCV.");
+          await page.type(`#credit-card-cvv`, process.env.USER_CCV, {
+            delay: getRndInteger(30, 60),
+          });
+        } catch (err) {
+          console.log("Failed to enter CCV. ", err);
+        }
       };
 
       const placeOrder = async () => {
@@ -120,13 +142,15 @@ const scraperObject = {
           }, 1000),
         ]);
       };
+      await sleep(getRndInteger(1000, 1500));
       await addToCart();
-      await sleep(getRndInteger(700, 2000));
+      await sleep(getRndInteger(1000, 2500));
       await checkout();
       await sleep(getRndInteger(1500, 3000));
       await login();
       await sleep(getRndInteger(1200, 2200));
       await fillCCV();
+      await sleep(getRndInteger(900, 1700));
       // await placeOrder();
       closeBrowser = true;
       console.log("Item purchased.");
